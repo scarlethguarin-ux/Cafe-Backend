@@ -7,7 +7,9 @@ const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'kafe_db',
-  ssl: true, // Requiere SSL en producción
+  ssl: {
+    rejectUnauthorized: false // <-- Esto evita el error de certificado auto-firmado
+  },
   port: process.env.DB_PORT || 5432,
   max: 20, // Número máximo de clientes en el pool
   idleTimeoutMillis: 30000, // Tiempo de inactividad para cerrar un cliente
