@@ -1,7 +1,7 @@
 const ProductoFinal = require('../models/ProductoFinal');
 
 exports.createProducto = async (req, res) => {
-  const { nombre_producto, presentacion, peso_gramos, precio_venta, stock_disponible } = req.body;
+  const { nombre_producto, presentacion, peso_gramos, precio_venta, stock_disponible, imagen } = req.body;
   if (!nombre_producto || isNaN(peso_gramos) || isNaN(precio_venta)) {
     return res.status(400).json({ success: false, message: 'Faltan campos obligatorios o formato inválido (nombre_producto, peso_gramos, precio_venta).' });
   }
@@ -12,7 +12,8 @@ exports.createProducto = async (req, res) => {
       presentacion,
       peso_gramos,
       precio_venta,
-      stock_disponible: stock_disponible || 0
+      stock_disponible: stock_disponible || 0,
+      imagen
     });
     res.status(201).json({ success: true, data: producto });
   } catch (error) {
@@ -42,7 +43,7 @@ exports.getProductoById = async (req, res) => {
 };
 
 exports.updateProducto = async (req, res) => {
-  const { nombre_producto, presentacion, peso_gramos, precio_venta, stock_disponible } = req.body;
+  const { nombre_producto, presentacion, peso_gramos, precio_venta, stock_disponible, imagen } = req.body;
 
   try {
     const producto = await ProductoFinal.update(req.params.id, {
@@ -50,7 +51,8 @@ exports.updateProducto = async (req, res) => {
       presentacion,
       peso_gramos,
       precio_venta,
-      stock_disponible
+      stock_disponible,
+      imagen
     });
     if (!producto) {
       return res.status(404).json({ success: false, message: 'Producto no encontrado.' });

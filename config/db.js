@@ -2,19 +2,24 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Configuración del Pool de conexiones a PostgreSQL
-const pool = new Pool({
+const poolConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'kafe_db',
-  ssl: {
-    rejectUnauthorized: false // <-- Esto evita el error de certificado auto-firmado
-  },
   port: process.env.DB_PORT || 5432,
-  max: 20, // Número máximo de clientes en el pool
-  idleTimeoutMillis: 30000, // Tiempo de inactividad para cerrar un cliente
-  connectionTimeoutMillis: 2000, // Tiempo límite para establecer conexión
-});
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+};
+
+if (process.env.DB_SSL === 'true') {
+  poolConfig.ssl = {
+    rejectUnauthorized: false
+  };
+}
+
+const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
   console.error('Error inesperado en el cliente del pool de PostgreSQL:', err);

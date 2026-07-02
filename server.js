@@ -11,6 +11,13 @@ const startServer = async () => {
     const result = await db.query('SELECT NOW()');
     console.log(`Conexión a PostgreSQL establecida con éxito. Hora del servidor BD: ${result.rows[0].now}`);
     
+    // Asegurar que la columna imagen existe en productos_finales
+    await db.query(`
+      ALTER TABLE productos_finales 
+      ADD COLUMN IF NOT EXISTS imagen TEXT;
+    `);
+    console.log('Esquema de base de datos verificado: columna "imagen" asegurada.');
+    
     // Escuchar peticiones en el puerto configurado
     app.listen(PORT, () => {
       console.log(`========================================================`);
