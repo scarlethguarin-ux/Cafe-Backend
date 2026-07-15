@@ -4,10 +4,19 @@ require('dotenv').config();
 
 const app = express();
 const corsOptions = {
-  // Aquí pones la URL de tu frontend en Netlify
-  origin: 'https://cafecolombia1.netlify.app/',
+  origin: function (origin, callback) {
+    const allowedOrigins = ['https://cafecolombia1.netlify.app'];
+
+    // Si no hay origen (ej. Postman) o si está en la lista blanca
+    // .replace(/\/$/, '') elimina la barra diagonal al final si existe
+    if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  credentials: true // Si usas cookies o sesiones, esto es necesario
 };
 
 app.use(cors(corsOptions));
