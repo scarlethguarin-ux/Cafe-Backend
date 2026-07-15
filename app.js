@@ -3,10 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-
-// Middlewares globales
 const corsOptions = {
-  origin: ['http://localhost:3000', 'https://cafecolombia1.netlify.app/']
+  // Aquí pones la URL de tu frontend en Netlify
+  origin: 'https://cafecolombia1.netlify.app/',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
