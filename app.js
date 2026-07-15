@@ -5,15 +5,19 @@ require('dotenv').config();
 const app = express();
 
 // Middlewares globales
-app.use(cors());
+const corsOptions = {
+  origin: ['http://localhost:3000', 'https://cafecolombia1.netlify.app/']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Endpoint de verificación de salud
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    success: true, 
-    message: 'Servidor del Backend de Productora de Café activo y funcionando.' 
+  res.status(200).json({
+    success: true,
+    message: 'Servidor del Backend de Productora de Café activo y funcionando.'
   });
 });
 
