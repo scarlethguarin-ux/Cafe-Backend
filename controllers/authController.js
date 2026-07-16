@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Usuario = require('../models/Usuario');
 const Rol = require('../models/Rol');
+const { sendWelcomeEmail } = require('../services/emailService');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkeyforcoffeeproducer123';
@@ -47,6 +48,9 @@ exports.register = async (req, res) => {
       password_hash,
       activo: activo !== undefined ? activo : true
     });
+
+    // Enviar correo de bienvenida de forma asíncrona
+    sendWelcomeEmail(email);
 
     res.status(201).json({
       success: true,
