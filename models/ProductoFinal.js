@@ -12,10 +12,47 @@ class ProductoFinal {
     return rows[0];
   }
 
-  static async findAll() {
-    const query = 'SELECT * FROM productos_finales ORDER BY id_producto ASC';
-    const { rows } = await db.query(query);
-    return rows;
+  static async findAll({ nombre, presentacion, precio_min, precio_max, limit = 10, offset = 0 } = {}) {
+    let query = 'SELECT * FROM productos_finales WHERE 1=1';
+    let countQuery = 'SELECT COUNT(*) FROM productos_finales WHERE 1=1';
+    const values = [];
+
+    if (nombre) {
+      values.push(`%${nombre}%`);
+      query += ` AND nombre_producto ILIKE $${values.length}`;
+      countQuery += ` AND nombre_producto ILIKE $${values.length}`;
+    }
+
+    if (presentacion) {
+      values.push(presentacion);
+      query += ` AND presentacion = $${values.length}`;
+      countQuery += ` AND presentacion = $${values.length}`;
+    }
+
+    if (precio_min) {
+      values.push(precio_min);
+      query += ` AND precio_venta >= $${values.length}`;
+      countQuery += ` AND precio_venta >= $${values.length}`;
+    }
+
+    if (precio_max) {
+      values.push(precio_max);
+      query += ` AND precio_venta <= $${values.length}`;
+      countQuery += ` AND precio_venta <= $${values.length}`;
+    }
+
+    // Agregar limit y offset a la query de datos
+    query += ` ORDER BY id_producto ASC LIMIT $${values.length + 1} OFFSET $${values.length + 2}`;
+    
+    // Obtener total de items
+    const countResult = await db.query(countQuery, values);
+    const totalItems = parseInt(countResult.rows[0].count, 10);
+
+    // Obtener datos paginados
+    const queryValues = [...values, limit, offset];
+    const { rows } = await db.query(query, queryValues);
+
+    return { rows, totalItems };
   }
 
   static async findById(id) {

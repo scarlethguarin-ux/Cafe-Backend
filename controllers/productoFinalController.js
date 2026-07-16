@@ -23,8 +23,45 @@ exports.createProducto = async (req, res) => {
 
 exports.getAllProductos = async (req, res) => {
   try {
-    const productos = await ProductoFinal.findAll();
-    res.status(200).json({ success: true, data: productos });
+    // 1. Extraer query params
+    const { 
+      nombre, 
+      presentacion, 
+      precio_min, 
+      precio_max, 
+      page = 1, 
+      limit = 10 
+    } = req.query;
+
+    // 2. Calcular el offset para la paginación
+    const pageNumber = parseInt(page, 10) > 0 ? parseInt(page, 10) : 1;
+    const limitNumber = parseInt(limit, 10) > 0 ? parseInt(limit, 10) : 10;
+    const offset = (pageNumber - 1) * limitNumber;
+
+    // 3. Ejecutar la búsqueda en el modelo
+    const { rows: productos, totalItems } = await ProductoFinal.findAll({
+      nombre,
+      presentacion,
+      precio_min: precio_min ? parseFloat(precio_min) : undefined,
+      precio_max: precio_max ? parseFloat(precio_max) : undefined,
+      limit: limitNumber,
+      offset
+    });
+
+    // 4. Calcular el total de páginas
+    const totalPages = Math.ceil(totalItems / limitNumber);
+
+    // 5. Devolver la respuesta con data y pagination sin romper el frontend
+    res.status(200).json({ 
+      success: true, 
+      data: productos,
+      pagination: {
+        totalItems,
+        totalPages,
+        currentPage: pageNumber,
+        limit: limitNumber
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
