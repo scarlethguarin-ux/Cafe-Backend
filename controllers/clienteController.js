@@ -1,4 +1,5 @@
 const Cliente = require('../models/Cliente');
+const { redisClient } = require('../config/redis');
 
 exports.createCliente = async (req, res) => {
   const { id_usuario, nombre_razon_social, identificacion_fiscal, telefono, direccion_envio } = req.body;
@@ -14,6 +15,10 @@ exports.createCliente = async (req, res) => {
       telefono,
       direccion_envio
     });
+
+    // Invalidar caché del listado de clientes
+    await redisClient.del('cache:/api/clientes');
+
     res.status(201).json({ success: true, data: cliente });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -54,6 +59,11 @@ exports.updateCliente = async (req, res) => {
     if (!cliente) {
       return res.status(404).json({ success: false, message: 'Cliente no encontrado.' });
     }
+
+    // Invalidar caché del listado y del cliente específico
+    await redisClient.del('cache:/api/clientes');
+    await redisClient.del(`cache:/api/clientes/${req.params.id}`);
+
     res.status(200).json({ success: true, data: cliente });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -66,6 +76,11 @@ exports.deleteCliente = async (req, res) => {
     if (!cliente) {
       return res.status(404).json({ success: false, message: 'Cliente no encontrado.' });
     }
+
+    // Invalidar caché
+    await redisClient.del('cache:/api/clientes');
+    await redisClient.del(`cache:/api/clientes/${req.params.id}`);
+
     res.status(200).json({ success: true, message: 'Cliente eliminado con éxito.', data: cliente });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

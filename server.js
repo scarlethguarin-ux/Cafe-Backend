@@ -1,5 +1,6 @@
 const app = require('./app');
 const db = require('./config/db');
+const { connectRedis } = require('./config/redis');
 require('dotenv').config();
 
 const PORT = process.env.PORT || 5000;
@@ -11,6 +12,9 @@ const startServer = async () => {
     const result = await db.query('SELECT NOW()');
     console.log(`Conexión a PostgreSQL establecida con éxito. Hora del servidor BD: ${result.rows[0].now}`);
     
+    // Conectar a Redis
+    await connectRedis();
+
     // Asegurar que la columna imagen existe en productos_finales
     await db.query(`
       ALTER TABLE productos_finales 
