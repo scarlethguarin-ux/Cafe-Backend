@@ -11,6 +11,11 @@ const cacheGet = (ttlSeconds = 300) => {
       return next();
     }
 
+    // 1.5 Si Redis no está conectado, ignorar la caché
+    if (!redisClient.isReady) {
+      return next();
+    }
+
     // 2. Generamos una clave única basada en la URL que se está visitando
     const key = `cache:${req.originalUrl}`;
 
@@ -40,8 +45,7 @@ const cacheGet = (ttlSeconds = 300) => {
 
       next(); // Pasamos el control al controlador
     } catch (error) {
-      console.error('Error en el middleware de caché:', error);
-      // Si Redis falla, continuamos normal
+      // Si falla, pasamos directo al controlador sin loguear el error pesado
       next(); 
     }
   };
